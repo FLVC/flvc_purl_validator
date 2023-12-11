@@ -1,0 +1,8 @@
+name: 'FLVC PURL Validator'
+type: module
+description: 'Validates FLVC PURL field values'
+core: 8.x
+core_version_requirement: ^8 || ^9
+package: 'FLVC'
+dependencies:
+  - islandora
