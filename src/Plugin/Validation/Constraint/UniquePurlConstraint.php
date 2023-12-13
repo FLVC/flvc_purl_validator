@@ -18,6 +18,6 @@ use Symfony\Component\Validator\Constraint;
  */
 class UniquePurlConstraint extends Constraint {
 
-  public $errorMessage = 'The purl field cannot be this value.';
+  public $errorMessage = 'The PURL Identifier field has errors listed below:<br>%host_error<br>%domain_error<br>%format_error<br>%duplicate_error';
 
 }
