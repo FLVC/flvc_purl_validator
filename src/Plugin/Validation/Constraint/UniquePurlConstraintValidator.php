@@ -72,7 +72,7 @@ class UniquePurlConstraintValidator extends ConstraintValidator {
       }
 
       // check purl path format
-      if ((preg_match("/^\/[A-Za-z]+\/[A-Za-z0-9_\-()\.]+$/", $purl_components['path']) == 0) ||
+      if ((preg_match("/^\/[A-Za-z0-9_\-()\.\/]+$/", $purl_components['path']) == 0) ||
           (isset($purl_components['query'])) ||
           (isset($purl_components['fragment']))) {
         $error_purls_format = $error_purls_format . $purl . ' ';
