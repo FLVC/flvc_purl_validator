@@ -47,8 +47,10 @@ class UniquePurlConstraintValidator extends ConstraintValidator {
     $host = $purl_service_data['host'];
     $host_server_name = parse_url($host, PHP_URL_HOST);
     $domain = $purl_service_data['domain'];
+    $institution = $purl_service_data['institution'];
     \Drupal::logger("flvc_purl_validator")->info("host={$host}");
     \Drupal::logger("flvc_purl_validator")->info("domain={$domain}");
+    \Drupal::logger("flvc_purl_validator")->info("institution={$institution}");
 
     $error_purls_host = '';
     $error_purls_domain = '';
@@ -78,28 +80,22 @@ class UniquePurlConstraintValidator extends ConstraintValidator {
         $error_purls_format = $error_purls_format . $purl . ' ';
       }
 
-      // if new ingest, check if purl exists
-/*
-      $request = new Request('GET', "{$host}/admin/purl/flvc/demo/en/node/1056");
-      $requestParams = array([
-        'headers' => [
-          'Content-Type' => 'application/json;charset=UTF-8'
-      ]]);
-      $purlId = 0;
-      try {
-        $response = $client->send($request, $requestParams);
-        $body = $response->getBody();
-        \Drupal::logger("flvc_purl_validator")->info("DEBUG body={$body}");
-        if ($body) {
-          $json = json_decode($body, TRUE);
-          $purlId = $json['purlId'] ?? 0;
+      // look for existing PURL
+      $purlInfo = $this->getPurlInfo($client, $host, $purl_components['path']);
+      if (isset($purlInfo)) {
+        \Drupal::logger("flvc_purl_validator")->info("DEBUG purlId={$purlInfo['purlId']}");
+        if ($entity->isNew()) {
+          // if ingest of new entity, then this is a duplicate violation
+          $error_purls_duplicate = $error_purls_duplicate . $purl . ' ';
+        }
+        else if (($institution != $purlInfo['institutionCode'])) {
+          // if edit of existing entity and institution not match, then this is a duplicate violation
+          $error_purls_duplicate = $error_purls_duplicate . $purl . ' ';
         }
       }
-      catch (RequestException $e) {
-        $purlId = 0;
+      else {
+        \Drupal::logger("flvc_purl_validator")->info("DEBUG purl not found");
       }
-      \Drupal::logger("flvc_purl_validator")->info("DEBUG purlId={$purlId}");
-*/
     }
 
     $error_msg_host = '';
@@ -123,6 +119,28 @@ class UniquePurlConstraintValidator extends ConstraintValidator {
     if ((strlen($error_purls_host) > 0)||(strlen($error_purls_domain) > 0)||
         (strlen($error_purls_format) > 0)||(strlen($error_purls_duplicate) > 0)) {
       $this->context->addViolation($constraint->errorMessage, ['%host_error' => $error_msg_host, '%domain_error' => $error_msg_domain, '%format_error' => $error_msg_format, '%duplicate_error' => $error_msg_duplicate]);
+    }
+  }
+
+  protected function getPurlInfo(\GuzzleHttp\ClientInterface $client, string $host, string $purlPath): ?array {
+    //$client = \Drupal::httpClient();
+    $request = new Request('GET', "{$host}/admin/purl{$purlPath}");
+    $requestParams = array([
+      'headers' => [
+        'Content-Type' => 'application/json;charset=UTF-8'
+    ]]);
+    try {
+      $response = $client->send($request, $requestParams);
+      $body = $response->getBody();
+      \Drupal::logger("flvc_purl_validator")->info("DEBUG body={$body}");
+      if ($body) {
+        $json = json_decode($body, TRUE);
+        //return $json['purlId'] ?? 0;
+        return $json;
+      }
+    }
+    catch (RequestException $e) {
+      return null;
     }
   }
 }
