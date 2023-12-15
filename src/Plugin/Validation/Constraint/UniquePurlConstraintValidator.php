@@ -64,37 +64,39 @@ class UniquePurlConstraintValidator extends ConstraintValidator {
       $purl_components = parse_url($purl);
 
       // check purl has configured host
-      if ($purl_components['host'] != $host_server_name) {
+      if ((!isset($purl_components['host']))||($purl_components['host'] != $host_server_name)) {
         $error_purls_host = $error_purls_host . $purl . ' ';
       }
 
       // check purl has configured domain
-      if (!(stripos($purl_components['path'], $domain . '/') === 0)) {
+      if ((!isset($purl_components['path']))||(!(stripos($purl_components['path'], $domain . '/') === 0))) {
         $error_purls_domain = $error_purls_domain . $purl . ' ';
       }
 
       // check purl path format
-      if ((preg_match("/^\/[A-Za-z0-9_\-()\.\/]+$/", $purl_components['path']) == 0) ||
+      if (((isset($purl_components['path']))&&(preg_match("/^\/[A-Za-z0-9_\-()\.\/]+$/", $purl_components['path']) == 0)) ||
           (isset($purl_components['query'])) ||
           (isset($purl_components['fragment']))) {
         $error_purls_format = $error_purls_format . $purl . ' ';
       }
 
-      // look for existing PURL
-      $purlInfo = $this->getPurlInfo($client, $host, $purl_components['path']);
-      if (isset($purlInfo)) {
-        \Drupal::logger("flvc_purl_validator")->info("DEBUG purlId={$purlInfo['purlId']}");
-        if ($entity->isNew()) {
-          // if ingest of new entity, then this is a duplicate violation
-          $error_purls_duplicate = $error_purls_duplicate . $purl . ' ';
+      if (isset($purl_components['path'])) {
+        // look for existing PURL
+        $purlInfo = $this->getPurlInfo($client, $host, $purl_components['path']);
+        if (isset($purlInfo)) {
+          \Drupal::logger("flvc_purl_validator")->info("DEBUG purlId={$purlInfo['purlId']}");
+          if ($entity->isNew()) {
+            // if ingest of new entity, then this is a duplicate violation
+            $error_purls_duplicate = $error_purls_duplicate . $purl . ' ';
+          }
+          else if (($institution != $purlInfo['institutionCode'])) {
+            // if edit of existing entity and institution not match, then this is a duplicate violation
+            $error_purls_duplicate = $error_purls_duplicate . $purl . ' ';
+          }
         }
-        else if (($institution != $purlInfo['institutionCode'])) {
-          // if edit of existing entity and institution not match, then this is a duplicate violation
-          $error_purls_duplicate = $error_purls_duplicate . $purl . ' ';
+        else {
+          \Drupal::logger("flvc_purl_validator")->info("DEBUG purl not found");
         }
-      }
-      else {
-        \Drupal::logger("flvc_purl_validator")->info("DEBUG purl not found");
       }
     }
 
