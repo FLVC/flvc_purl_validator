@@ -69,7 +69,7 @@ class UniquePurlConstraintValidator extends ConstraintValidator {
       }
 
       // check purl has configured domain
-      if (!(strpos($purl_components['path'], $domain . '/') === 0)) {
+      if (!(stripos($purl_components['path'], $domain . '/') === 0)) {
         $error_purls_domain = $error_purls_domain . $purl . ' ';
       }
 
