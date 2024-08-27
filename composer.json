@@ -1,0 +1,9 @@
+{
+    "name": "flvc/flvc_purl_validator",
+    "description": "Validates FLVC PURL field values.",
+    "type": "drupal-module",
+    "require": {
+      "islandora/islandora": "^1 || ^2",
+      "flvc/dgi_actions": "*"
+    }
+}
