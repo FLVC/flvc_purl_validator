@@ -32,9 +32,9 @@ class UniquePurlConstraintValidator extends ConstraintValidator {
       $entityOriginal = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($entity->id());
       if (isset($entityOriginal)) {
         \Drupal::logger("flvc_purl_validator")->info("entity has original in storage");
-        if ($entityOriginal->hasField('field_purl_identifier')) {
-          \Drupal::logger("flvc_purl_validator")->info("original entity has field_purl_identifier");
-          $purlList =  $entityOriginal->get('field_purl_identifier')->getValue();
+        if ($entityOriginal->hasField('field_purl')) {
+          \Drupal::logger("flvc_purl_validator")->info("original entity has field_purl");
+          $purlList =  $entityOriginal->get('field_purl')->getValue();
           foreach ($purlList as $purl) {
             \Drupal::logger("flvc_purl_validator")->info("original purl={$purl['uri']}");
           }

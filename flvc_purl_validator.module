@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
  */
 function flvc_purl_validator_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
 
-  if ($entity_type->id() == 'node' && $bundle == 'islandora_object' && isset($fields['field_purl_identifier']) && !empty($fields['field_purl_identifier'])) {
-    $fields['field_purl_identifier']->addConstraint('PurlValidatorUniquePurl');
+  if ($entity_type->id() == 'node' && $bundle == 'islandora_object' && isset($fields['field_purl']) && !empty($fields['field_purl'])) {
+    $fields['field_purl']->addConstraint('PurlValidatorUniquePurl');
   }
 }
