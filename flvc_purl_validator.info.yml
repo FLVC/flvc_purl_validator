@@ -5,3 +5,5 @@ core_version_requirement: ^9 || ^10
 package: 'FLVC'
 dependencies:
   - islandora
+  - dgi_actions:dgi_actions
+  - dgi_actions:dgi_actions_purl
